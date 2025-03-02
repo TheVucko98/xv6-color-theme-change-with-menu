@@ -43,6 +43,9 @@ fnvprintf (fnprintf_putc putc, const char* fmt, va_list args)
 		if(c == 0)
 			break;
 		switch(c){
+		case 'c':  // Dodato za karakter
+                putc(va_arg(args, int));  // Pretvori char u int (to je uobičajena praksa u printf funkcijama)
+                break;
 		case 'd':
 			printint(putc, va_arg(args, int), 10, 1);
 			break;

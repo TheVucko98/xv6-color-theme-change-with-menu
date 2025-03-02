@@ -131,13 +131,32 @@ struct {
 
 #define C(x)  ((x)-'@')  // Control-x
 
+printPopWindow()
+{
+	int pos;
+
+	// Cursor position: col + 80*row.
+	outb(CRTPORT, 14);
+	pos = inb(CRTPORT+1) << 8;
+	outb(CRTPORT, 15);
+	pos |= inb(CRTPORT+1);
+
+	
+
+}
+
+
 void
 consoleintr(int (*getc)(void))
 {
 	int c, doprocdump = 0;
-
+	static int altUslov = 0;
 	acquire(&cons.lock);
 	while((c = getc()) >= 0){
+		if(c == 0xFF){
+			altUslov = (altUslov+1)%2;
+			printPopWindow();
+		}else if(altUslov == 0){
 		switch(c){
 		case C('P'):  // Process listing.
 			// procdump() locks cons.lock indirectly; invoke later
@@ -167,7 +186,11 @@ consoleintr(int (*getc)(void))
 				}
 			}
 			break;
+		 }
+		}else if(altUslov && (c == 'w' || c == 's')){
+			e9printf("%c\n",c);
 		}
+		
 	}
 	release(&cons.lock);
 	if(doprocdump) {
