@@ -69,8 +69,10 @@ panic(char *s)
 
 #define BACKSPACE 0x100
 #define CRTPORT 0x3d4
+#define TEXT_ROW_LEN 9
+#define TEXT_LEN 12
 static ushort *crt = (ushort*)P2V(0xb8000);  // CGA memory
-
+static ushort savedText[TEXT_LEN];
 static void
 cgaputc(int c)
 {
@@ -130,7 +132,13 @@ struct {
 } input;
 
 #define C(x)  ((x)-'@')  // Control-x
-
+static int popWindowFlag = 0;
+static char text[4][11] = {
+    "| lgr blk |",
+    "| mgt WHT |",
+    "| red CYN |",
+    "| WHT YLW |"
+};
 printPopWindow()
 {
 	int pos;
@@ -140,6 +148,63 @@ printPopWindow()
 	pos = inb(CRTPORT+1) << 8;
 	outb(CRTPORT, 15);
 	pos |= inb(CRTPORT+1);
+
+	pos = (pos-(80*9));
+	if(!popWindowFlag){
+		if(pos%80 < 69){
+
+		for(int j = 0; j < TEXT_ROW_LEN; j++){
+			for(int i = pos+1; i < pos+TEXT_LEN; i++){
+			savedText[i] = crt[i];
+			char c;
+			if(j%2 == 0 ){
+				c = '-';
+			}else{
+				c = text[j/2][i-pos-1];
+			}
+			crt[i] = (c&0xff) | 0x7000;
+		}
+			pos+=80;
+		}
+		
+	}else{
+		for(int j = 0; j < TEXT_ROW_LEN; j++){
+			for(int i = pos-1-TEXT_LEN; i < pos; i++){
+			savedText[i] = crt[i];
+			char c;
+			if(j%2 == 0 ){
+				c = '-';
+			}else if(i == pos-1-TEXT_LEN || i == pos-1){
+				c = '|';
+			}else{
+				c = 'A';
+			}
+			crt[i] = (c&0xff) | 0x7000;
+			}
+			pos+=80;
+		}
+		
+	}
+	popWindowFlag = 1;
+	}else{
+		if(pos%80 < 69){
+		for(int j = 0; j < TEXT_ROW_LEN; j++){
+			for(int i = pos+1; i < pos+TEXT_LEN; i++){
+			crt[i] = savedText[i];
+		}
+			pos+=80;
+		}
+	}else{
+		for(int j = 0; j < TEXT_ROW_LEN; j++){
+			for(int i = pos-1-TEXT_LEN; i < pos; i++){
+			crt[i] = savedText[i];
+			}
+			pos+=80;
+		}
+	}
+	popWindowFlag = 0;
+	}
+	
 
 	
 
