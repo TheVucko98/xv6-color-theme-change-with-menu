@@ -70,9 +70,13 @@ panic(char *s)
 #define BACKSPACE 0x100
 #define CRTPORT 0x3d4
 #define TEXT_ROW_LEN 9
-#define TEXT_LEN 12
+#define TEXT_LEN 11
 static ushort *crt = (ushort*)P2V(0xb8000);  // CGA memory
 static ushort savedText[TEXT_LEN];
+static ushort colorID = 0;
+static ushort colorType[] = {
+	0x0700, 0x7500, 0xB400, 0xE700
+	};
 static void
 cgaputc(int c)
 {
@@ -89,7 +93,7 @@ cgaputc(int c)
 	else if(c == BACKSPACE){
 		if(pos > 0) --pos;
 	} else
-		crt[pos++] = (c&0xff) | 0x0700;  // black on white
+		crt[pos++] = (c&0xff) | colorType[colorID];  // black on white
 
 	if(pos < 0 || pos > 25*80)
 		panic("pos under/overflow");
@@ -97,14 +101,16 @@ cgaputc(int c)
 	if((pos/80) >= 24){  // Scroll up.
 		memmove(crt, crt+80, sizeof(crt[0])*23*80);
 		pos -= 80;
-		memset(crt+pos, 0, sizeof(crt[0])*(24*80 - pos));
+		for(int i = pos;i < pos+(24*80 - pos);i++){
+			crt[i] = (' '&0xff) | colorType[colorID];
+		}
 	}
 
 	outb(CRTPORT, 14);
 	outb(CRTPORT+1, pos>>8);
 	outb(CRTPORT, 15);
 	outb(CRTPORT+1, pos);
-	crt[pos] = ' ' | 0x0700;
+	crt[pos] = ' ' | colorType[colorID];
 }
 
 void
@@ -149,18 +155,18 @@ printPopWindow()
 	outb(CRTPORT, 15);
 	pos |= inb(CRTPORT+1);
 
-	pos = (pos-(80*9));
+	pos = (pos-(80*9))+1;
 	if(!popWindowFlag){
 		if(pos%80 < 69){
 
 		for(int j = 0; j < TEXT_ROW_LEN; j++){
-			for(int i = pos+1; i < pos+TEXT_LEN; i++){
+			for(int i = pos; i < pos+TEXT_LEN; i++){
 			savedText[i] = crt[i];
 			char c;
 			if(j%2 == 0 ){
 				c = '-';
 			}else{
-				c = text[j/2][i-pos-1];
+				c = text[j/2][i-pos];
 			}
 			crt[i] = (c&0xff) | 0x7000;
 		}
@@ -168,18 +174,19 @@ printPopWindow()
 		}
 		
 	}else{
+		pos--;
 		for(int j = 0; j < TEXT_ROW_LEN; j++){
-			for(int i = pos-1-TEXT_LEN; i < pos; i++){
+			for(int i = pos-TEXT_LEN; i < pos; i++){
 			savedText[i] = crt[i];
 			char c;
 			if(j%2 == 0 ){
 				c = '-';
-			}else if(i == pos-1-TEXT_LEN || i == pos-1){
+			}else if(i == pos-TEXT_LEN || i == pos-1){
 				c = '|';
 			}else{
-				c = 'A';
+				c = text[j/2][i-pos+TEXT_LEN];
 			}
-			crt[i] = (c&0xff) | 0x7000;
+				crt[i] = (c&0xff) | 0x7000;
 			}
 			pos+=80;
 		}
@@ -189,15 +196,16 @@ printPopWindow()
 	}else{
 		if(pos%80 < 69){
 		for(int j = 0; j < TEXT_ROW_LEN; j++){
-			for(int i = pos+1; i < pos+TEXT_LEN; i++){
-			crt[i] = savedText[i];
+			for(int i = pos; i < pos+TEXT_LEN; i++){
+			crt[i] = (savedText[i]&0xff) | colorType[colorID];
 		}
 			pos+=80;
 		}
 	}else{
+		pos--;
 		for(int j = 0; j < TEXT_ROW_LEN; j++){
-			for(int i = pos-1-TEXT_LEN; i < pos; i++){
-			crt[i] = savedText[i];
+			for(int i = pos-TEXT_LEN; i < pos; i++){
+			crt[i] = (savedText[i]&0xff) | colorType[colorID];
 			}
 			pos+=80;
 		}
@@ -253,7 +261,16 @@ consoleintr(int (*getc)(void))
 			break;
 		 }
 		}else if(altUslov && (c == 'w' || c == 's')){
-			e9printf("%c\n",c);
+			if(c == 'w'){
+				colorID--;
+			}else{
+				colorID++;
+			}
+			colorID%=4;
+			updateScreenTheme();
+		}else if(altUslov && c == '\n'){
+			altUslov = (altUslov+1)%2;
+			printPopWindow();
 		}
 		
 	}
@@ -261,6 +278,33 @@ consoleintr(int (*getc)(void))
 	if(doprocdump) {
 		procdump();  // now call procdump() wo. cons.lock held
 	}
+}
+void
+updateScreenTheme(){
+	int pos;
+
+	
+	outb(CRTPORT, 14);
+	pos = inb(CRTPORT+1) << 8;
+	outb(CRTPORT, 15);
+	pos |= inb(CRTPORT+1);
+
+	pos = (pos-(80*9))+1;
+	if(pos%80 >= 69){
+		pos -= (1+TEXT_LEN);
+	}
+	for(int i = 0; i < 25; i++){
+		for(int j = 0; j < 80; j++){
+			if((j >= pos%80 && j < pos%80+TEXT_LEN) &&
+				(i >= pos/80 && i < pos/80+TEXT_ROW_LEN)){
+					continue;
+				}
+			int id = j+i*80;
+			char c = crt[id];
+			crt[id] =  (c&0xff) | colorType[colorID];
+		}
+	}
+
 }
 
 int
