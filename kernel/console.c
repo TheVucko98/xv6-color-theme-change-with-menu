@@ -93,7 +93,7 @@ cgaputc(int c)
 	else if(c == BACKSPACE){
 		if(pos > 0) --pos;
 	} else
-		crt[pos++] = (c&0xff) | colorType[colorID];  // black on white
+		crt[pos++] = (c&0xff) | colorType[colorID];  
 
 	if(pos < 0 || pos > 25*80)
 		panic("pos under/overflow");
@@ -165,10 +165,16 @@ printPopWindow()
 			char c;
 			if(j%2 == 0 ){
 				c = '-';
+				
 			}else{
 				c = text[j/2][i-pos];
+				
 			}
-			crt[i] = (c&0xff) | 0x7000;
+				if(j%2 && j/2 == colorID){
+				crt[i] = (c&0xff) | 0x2000;
+				}else
+				crt[i] = (c&0xff) | 0x7000;
+			
 		}
 			pos+=80;
 		}
@@ -186,6 +192,9 @@ printPopWindow()
 			}else{
 				c = text[j/2][i-pos+TEXT_LEN];
 			}
+				if(j%2 && j/2 == colorID)
+				crt[i] = (c&0xff) | 0x2000;
+				else
 				crt[i] = (c&0xff) | 0x7000;
 			}
 			pos+=80;
@@ -268,6 +277,8 @@ consoleintr(int (*getc)(void))
 			}
 			colorID%=4;
 			updateScreenTheme();
+			printPopWindow();
+			printPopWindow();
 		}else if(altUslov && c == '\n'){
 			altUslov = (altUslov+1)%2;
 			printPopWindow();

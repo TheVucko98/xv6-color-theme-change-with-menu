@@ -40,6 +40,7 @@ kbdgetc(void)
 		else if('A' <= c && c <= 'Z')
 			c += 'a' - 'A';
 	}
+	// detektuje ALT+t/T
 	if(shift & ALT && (c == 't' || c == 'T')){
 		return 0xFF;
 	}
