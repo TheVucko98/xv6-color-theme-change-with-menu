@@ -170,7 +170,7 @@ printPopWindow()
 				c = text[j/2][i-pos];
 				
 			}
-				if(j%2 && j/2 == colorID){
+				if(j%2 && j/2 == colorID && i > (pos+ 1) && i < pos + TEXT_LEN-2){
 				crt[i] = (c&0xff) | 0x2000;
 				}else
 				crt[i] = (c&0xff) | 0x7000;
@@ -192,7 +192,7 @@ printPopWindow()
 			}else{
 				c = text[j/2][i-pos+TEXT_LEN];
 			}
-				if(j%2 && j/2 == colorID)
+				if(j%2 && j/2 == colorID && i > (pos-TEXT_LEN+ 1) && i < pos - 2)
 				crt[i] = (c&0xff) | 0x2000;
 				else
 				crt[i] = (c&0xff) | 0x7000;
