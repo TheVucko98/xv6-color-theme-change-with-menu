@@ -22,7 +22,7 @@ The new functionality is integrated carefully to ensure it does not interfere wi
 
 ```bash
 # Clone your assigned repository
-git clone <your-github-classroom-repo>
+git clone https://github.com/TheVucko98/xv6-color-theme-change-with-menu.git
 
 cd projectName
 make qemu
