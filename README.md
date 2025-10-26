@@ -18,8 +18,11 @@ The new functionality is integrated carefully to ensure it does not interfere wi
 - **Persistence:** Last selected theme is remembered and pre-selected on reopening.  
 - **Dynamic Positioning:** Table appears near the cursor, adjusting left/right if needed.
 
-## Installation
-1. Clone the repository:
-   ```bash
-   git clone <repo-link>
-   cd <repo-name>
+## 🚀 How to Build & Run
+
+```bash
+# Clone your assigned repository
+git clone <your-github-classroom-repo>
+
+cd projectName
+make qemu
