@@ -25,4 +25,4 @@ The new functionality is integrated carefully to ensure it does not interfere wi
 git clone https://github.com/TheVucko98/xv6-color-theme-change-with-menu.git
 
 cd projectName
-make qemu
+make qemu-nox
