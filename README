@@ -1,23 +1,22 @@
 # OS2025 - Home Assignment 1: Theme Color Customization in xv6
 
 ## Overview
-This project extends the xv6 operating system to support dynamic theme changes, allowing users to customize the foreground and background colors of the entire screen. The functionality is implemented through an interactive table menu.
-
-The task ensures that the new feature does not interfere with the normal operation or performance of the system.
+This project modifies the xv6 operating system to support dynamic theme changes, allowing users to customize the foreground and background colors of the entire screen via an interactive table menu.  
+The new functionality is integrated carefully to ensure it does not interfere with normal system operations or performance.
 
 ## Features
-- Display and hide a theme selection table using `ALT + T`.
-- Navigate the table using:
-  - `w` - move up
-  - `s` - move down
-- Choose from four predefined color combinations:
-  1. Light Gray + Black (`lgr blk`)
-  2. Magenta + White (`mgt WHT`)
-  3. Red + Bright Cyan (`red CYN`)
-  4. White + Yellow (`WHT YWL`)
-- The currently selected item is highlighted (black text on green background).
-- Last selected theme is remembered and pre-selected when reopening the menu.
-- Table dynamically positions itself near the cursor based on available screen space.
+- **Display/Hide Theme Table:** `ALT + T`  
+- **Navigate Table:** 
+  - `w` – move up  
+  - `s` – move down  
+- **Color Combinations:**  
+  1. Light Gray + Black (`lgr blk`)  
+  2. Magenta + White (`mgt WHT`)  
+  3. Red + Bright Cyan (`red CYN`)  
+  4. White + Yellow (`WHT YWL`)  
+- **Highlighting:** Selected item shows black text on green background.  
+- **Persistence:** Last selected theme is remembered and pre-selected on reopening.  
+- **Dynamic Positioning:** Table appears near the cursor, adjusting left/right if needed.
 
 ## Installation
 1. Clone the repository:
