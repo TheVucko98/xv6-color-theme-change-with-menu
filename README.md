@@ -1,4 +1,4 @@
-# OS2025 - Home Assignment 1: Add dynamic theme color customization to xv6 via an interactive table menu.
+# OS2025  Add dynamic theme color customization to xv6 via an interactive table menu.
 
 ## Overview
 This project modifies the xv6 operating system to support dynamic theme changes, allowing users to customize the foreground and background colors of the entire screen via an interactive table menu.  
